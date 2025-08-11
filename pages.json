@@ -1,0 +1,83 @@
+{
+	"easycom": {
+			"autoscan": true,
+			
+			"custom": {
+				"^u--(.*)": "@/uni_modules/uview-plus/components/u-$1/u-$1.vue",
+				"^up-(.*)": "@/uni_modules/uview-plus/components/u-$1/u-$1.vue",
+		    "^u-([^-].*)": "@/uni_modules/uview-plus/components/u-$1/u-$1.vue"
+			}
+		},
+	"pages": [
+		{
+			"path" : "pages/login/login"
+		},
+		{
+			"path": "pages/department/department",
+			"style": {
+				"navigationBarTitleText": "部门展览"
+			}
+		},
+		{
+			"path": "pages/department/detail",
+			"style": {
+				"navigationBarTitleText": "部门详情"
+			}
+		},
+		{
+			"path": "pages/paper/paper",
+			"style": {
+				"navigationBarTitleText": "已填报"
+			}
+		},
+		{
+			"path": "pages/info/info",
+			"style": {
+				"navigationBarTitleText": "个人中心"
+			}
+		},
+		{
+			"path": "pages/info/edit",
+			"style": {
+				"navigationBarTitleText": "编辑个人信息"
+			}
+		},
+		{
+			"path": "pages/info/setPassword",
+			"style": {
+				"navigationBarTitleText": "设置密码"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "学线纳新系统",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	// 删除原生tabBar配置，使用自定义tabBar
+	// "tabBar": {
+	// 	"height": "100rpx",
+	// 	"list": [
+	// 		{
+	// 			"pagePath": "pages/department/department",
+	// 			"text": "部门展览",
+	// 			"iconPath": "/static/assets/home.png",
+	// 			"selectedIconPath": "/static/assets/home (1).png"
+	// 		},
+	// 		{
+	// 			"pagePath": "pages/paper/paper",
+	// 			"text": "已填报",
+	// 			"iconPath": "/static/assets/detail.png",
+	// 			"selectedIconPath": "/static/assets/detail (1).png"
+	// 		},
+	// 		{
+	// 			"pagePath": "pages/info/info",
+	// 			"text": "个人中心",
+	// 			"iconPath": "/static/assets/user.png",
+	// 			"selectedIconPath": "/static/assets/user (1).png"
+	// 		}
+	// 	]
+	// },
+	"uniIdRouter": {}
+}

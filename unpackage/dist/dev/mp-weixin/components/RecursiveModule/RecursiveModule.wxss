@@ -1,0 +1,79 @@
+
+.module-item.data-v-3898b9c7 {
+		border-bottom: 1rpx solid #eee;
+}
+.module-header.data-v-3898b9c7 {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 30rpx 20rpx;
+		font-size: 32rpx;
+		font-weight: bold;
+		color: #333;
+}
+.submodule-list.data-v-3898b9c7 {
+		padding-left: 40rpx;
+		background-color: #f9f9f9;
+}
+.department-list.data-v-3898b9c7 {
+		padding-left: 40rpx;
+		background-color: #f0f0f0;
+}
+.department-item.data-v-3898b9c7 {
+		padding: 20rpx;
+		font-size: 28rpx;
+		color: #666;
+		border-bottom: 1rpx solid #eee;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+}
+.arrow-icon.data-v-3898b9c7 {
+	font-size: 24rpx;
+	color: #999;
+}
+.leaf-node.data-v-3898b9c7 {
+	background-color: #f0f7ff;
+	font-weight: normal;
+}
+.leaf-node .module-name.data-v-3898b9c7 {
+	color: #1890ff;
+	font-weight: bold;
+}
+.arrow-right.data-v-3898b9c7 {
+		font-size: 24rpx;
+		color: #999;
+		margin-left: auto;
+}
+
+	/* 递归模块层级样式 */
+.level-1 .module-header.data-v-3898b9c7 {
+		padding-left: 20rpx;
+}
+.level-2 .module-header.data-v-3898b9c7 {
+		padding-left: 60rpx;
+}
+.level-3 .module-header.data-v-3898b9c7 {
+		padding-left: 100rpx;
+}
+.level-4 .module-header.data-v-3898b9c7 {
+		padding-left: 140rpx;
+}
+.level-5 .module-header.data-v-3898b9c7 {
+		padding-left: 180rpx;
+}
+.level-6 .module-header.data-v-3898b9c7 {
+		padding-left: 220rpx;
+}
+.level-7 .module-header.data-v-3898b9c7 {
+		padding-left: 260rpx;
+}
+.level-8 .module-header.data-v-3898b9c7 {
+		padding-left: 300rpx;
+}
+.level-9 .module-header.data-v-3898b9c7 {
+		padding-left: 340rpx;
+}
+.level-10 .module-header.data-v-3898b9c7 {
+		padding-left: 380rpx;
+}

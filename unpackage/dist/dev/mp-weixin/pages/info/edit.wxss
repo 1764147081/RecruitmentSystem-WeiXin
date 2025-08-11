@@ -1,0 +1,93 @@
+
+.edit-container.data-v-c130aaa9 {
+		padding: 20rpx;
+		background-color: #f5f5f5;
+		min-height: 100vh;
+}
+.page-title.data-v-c130aaa9 {
+		text-align: center;
+		font-size: 36rpx;
+		font-weight: bold;
+		padding: 30rpx 0;
+		background-color: #fff;
+		margin-bottom: 20rpx;
+		border-radius: 16rpx;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+.avatar-container.data-v-c130aaa9 {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		background-color: #fff;
+		padding: 30rpx 0;
+		border-radius: 16rpx;
+		margin-bottom: 20rpx;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+.avatar.data-v-c130aaa9 {
+		width: 200rpx;
+		height: 200rpx;
+		border-radius: 50%;
+		margin-bottom: 20rpx;
+		border: 2rpx solid #eee;
+}
+.upload-btn.data-v-c130aaa9 {
+		background-color: #007aff;
+		padding: 15rpx 40rpx;
+		border-radius: 50rpx;
+		font-size: 28rpx;
+		color: #fff;
+}
+.form-list.data-v-c130aaa9 {
+		background-color: #fff;
+		border-radius: 16rpx;
+		margin-bottom: 20rpx;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+.form-item.data-v-c130aaa9 {
+		display: flex;
+		align-items: center;
+		padding: 30rpx 20rpx;
+		border-bottom: 1rpx solid #eee;
+}
+.form-item.data-v-c130aaa9:last-child {
+		border-bottom: none;
+}
+.form-label.data-v-c130aaa9 {
+		font-size: 30rpx;
+		color: #333;
+		width: 180rpx;
+}
+.form-input.data-v-c130aaa9 {
+			flex: 1;
+			font-size: 30rpx;
+			color: #666;
+}
+.form-input-readonly.data-v-c130aaa9 {
+			flex: 1;
+			font-size: 30rpx;
+			color: #999;
+			background-color: #f5f5f5;
+			cursor: not-allowed;
+}
+.password-btn.data-v-c130aaa9 {
+		background-color: #007aff;
+		text-align: center;
+		padding: 30rpx 0;
+		border-radius: 16rpx;
+		font-size: 32rpx;
+		color: #fff;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+		margin-top: 20rpx;
+}
+.save-btn.data-v-c130aaa9 {
+		background-color: #e64340;
+		text-align: center;
+		padding: 30rpx 0;
+		border-radius: 16rpx;
+		font-size: 32rpx;
+		color: #fff;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+		margin-top: 20rpx;
+}
+	

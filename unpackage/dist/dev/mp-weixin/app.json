@@ -1,0 +1,18 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/department/department",
+    "pages/department/detail",
+    "pages/paper/paper",
+    "pages/info/info",
+    "pages/info/edit",
+    "pages/info/setPassword"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "学线纳新系统",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "usingComponents": {}
+}

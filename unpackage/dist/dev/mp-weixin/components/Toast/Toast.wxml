@@ -1,0 +1,1 @@
+<view class="{{['toast', virtualHostClass]}}" style="{{virtualHostStyle}}" hidden="{{virtualHostHidden || false}}" id="{{b}}"><up-toast class="r" virtualHostClass="r" u-r="uToastRef" u-i="49e68ce6-0" bind:__l="__l"></up-toast></view>
