@@ -24,7 +24,7 @@
 			</view>
 			<view class="info-item">
 				<text class="info-label">专业</text>
-				<text class="info-value">软件工程</text>
+				<text class="info-value">{{ major }}</text>
 			</view>
 			<view class="info-item">
 				<text class="info-label">邮箱</text>
@@ -71,6 +71,7 @@
 			return {
 				username: '',
 				college: '',
+				major: '',
 				name: '',
 				email: '',
 				qq: '',
@@ -160,6 +161,7 @@
 					this.name = response.data.name || '';
 					this.email = response.data.email || '';
 					this.qq = response.data.qq || '';
+					this.major = response.data.major || '';
 					this.avatar = response.data.avatar || '/static/assets/nav_icon_avatar_nor.png';
 					this.profile = response.data.profile || '这个人很懒，什么都没有写';
 				} else if (response && response.code === 401) {

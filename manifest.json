@@ -72,27 +72,9 @@
     },
     "vueVersion" : "3",
     "h5" : {
-            "template" : "",
-            "domain" : "127.0.0.1",
-            "router" : {
-                "mode" : "hash",
-                "base" : "./"
-            },
-            "publicPath" : "./",
-            "devServer" : {
-                "disableHostCheck" : true,
-                "https" : true,
-                "port" : 8080,
-                "proxy" : {
-                    "/api" : {
-                        "target" : "http://127.0.0.1", //这里使用后端服务器的地址
-                        "changeOrigin" : true, //是否跨域
-                        "secure" : true, // 是否支持 https 协议的代理
-                        "pathRewrite" : {
-                            "^/api" : ""
-                        }
-                    }
-                }
-            }
+        "router" : {
+            "mode" : "history",
+            "base" : "/"
         }
+    }
 }
