@@ -109,6 +109,7 @@ export function chooseFile({
             // #ifdef MP-WEIXIN
             // 只有微信小程序才支持chooseMedia接口
         case 'media':
+            // #ifdef MP-WEIXIN
             wx.chooseMedia({
                 count: multiple ? Math.min(maxCount, 9) : 1,
                 sourceType: capture,
@@ -118,6 +119,28 @@ export function chooseFile({
                 success: (res) => resolve(formatMedia(res)),
                 fail: reject
             })
+            // #endif
+            // #ifndef MP-WEIXIN
+            // #ifdef H5
+            uni.chooseFile({
+                count: multiple ? maxCount : 1,
+                type: 'media',
+                success: (res) => resolve(formatMedia(res)),
+                fail: reject
+            })
+            // #endif
+            // #ifndef H5
+            uni.chooseMedia({
+                count: multiple ? Math.min(maxCount, 9) : 1,
+                sourceType: capture,
+                maxDuration,
+                sizeType,
+                camera,
+                success: (res) => resolve(formatMedia(res)),
+                fail: reject
+            })
+            // #endif
+            // #endif
             break
             // #endif
         case 'video':
@@ -141,6 +164,7 @@ export function chooseFile({
                 fail: reject
             })
             // #endif
+            // #ifndef MP-WEIXIN
             // #ifdef H5
             // 需要hx2.9.9以上才支持uni.chooseFile
             let params = {
@@ -154,6 +178,15 @@ export function chooseFile({
             }
             uni.chooseFile(params)
             // #endif
+            // #ifndef H5
+            uni.chooseMessageFile({
+                count: multiple ? maxCount : 1,
+                type: accept,
+                success: (res) => resolve(formatFile(res)),
+                fail: reject
+            })
+            // #endif
+            // #endif
             break
 		// #endif
 		default: 
@@ -166,6 +199,7 @@ export function chooseFile({
 			    fail: reject
 			})
 			// #endif
+			// #ifndef MP-WEIXIN
 			// #ifdef H5
 			// 需要hx2.9.9以上才支持uni.chooseFile
             let paramsFile = {
@@ -178,6 +212,15 @@ export function chooseFile({
                 paramsFile.extension = extension
             }
 			uni.chooseFile(paramsFile)
+			// #endif
+			// #ifndef H5
+			uni.chooseMessageFile({
+			    count: multiple ? maxCount : 1,
+			    type: 'all',
+			    success: (res) => resolve(formatFile(res)),
+			    fail: reject
+			})
+			// #endif
 			// #endif
         }
     })

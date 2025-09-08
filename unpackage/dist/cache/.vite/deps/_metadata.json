@@ -1,15 +1,25 @@
 {
-  "hash": "beebc08b",
+  "hash": "faa0222d",
   "configHash": "c0582694",
-  "lockfileHash": "a781ad70",
-  "browserHash": "47631416",
+  "lockfileHash": "e072db6b",
+  "browserHash": "1acee756",
   "optimized": {
     "dayjs/esm/index": {
       "src": "../../../../../../../../../node_modules/dayjs/esm/index.js",
       "file": "dayjs_esm_index.js",
-      "fileHash": "a08d3a88",
+      "fileHash": "5b73ead6",
       "needsInterop": false
+    },
+    "sass": {
+      "src": "E:/000Work/HBuilderX/plugins/compile-dart-sass/node_modules/sass/sass.default.dart.js",
+      "file": "sass.js",
+      "fileHash": "e7cb5c3c",
+      "needsInterop": true
     }
   },
-  "chunks": {}
+  "chunks": {
+    "chunk-TDUMLE5V": {
+      "file": "chunk-TDUMLE5V.js"
+    }
+  }
 }

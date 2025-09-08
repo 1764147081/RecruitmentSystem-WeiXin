@@ -1,241 +1,331 @@
 <template>
-  <view class="paper-container">
-    <view class="header">
-      <text class="title">部门报名问卷</text>
-    </view>
+	<view class="paper-container">
+		<u-navbar title="已填报" left-icon="arrow-left" bg-color="#F8F8F8" title-color="#000000" :border="false">
+		</u-navbar>
+		<view class="questionnaires-list">
+			<view v-if="questionnaires.length === 0" class="empty-tip">
+				<text>暂无已填问卷</text>
+			</view>
+			<view v-for="item in questionnaires" :key="item.id" class="questionnaire-item">
+				<view class="item-header">
+					<text class="item-title">{{ item.title }}</text>
+					<view class="item-actions">
+						<button class="view-btn" @click="viewQuestionnaire(item)">查看</button>
+						<button class="delete-btn" @click="deleteQuestionnaire(item.id)">取消报名</button>
+					</view>
+				</view>
+			</view>
+		</view>
 
-    <view class="form-container">
-      <view class="form-item">
-        <text class="label">姓名</text>
-        <input class="input" placeholder="请输入您的姓名" v-model="form.name" />
-      </view>
-
-      <view class="form-item">
-        <text class="label">学号</text>
-        <input class="input" placeholder="请输入您的学号" v-model="form.studentId" />
-      </view>
-
-      <view class="form-item">
-        <text class="label">联系电话</text>
-        <input class="input" placeholder="请输入您的联系电话" v-model="form.phone" />
-      </view>
-
-      <view class="form-item">
-        <text class="label">报名部门</text>
-        <text class="value">{{ departmentName }}</text>
-      </view>
-
-      <view class="form-item">
-        <text class="label">申请理由</text>
-        <textarea class="textarea" placeholder="请输入您的申请理由" v-model="form.reason"></textarea>
-      </view>
-    </view>
-
-    <view class="btn-container">
-      <button class="submit-btn" @click="submitForm">提交报名</button>
-    </view>
-
-    <!-- 底部导航 -->
-    <view class="tab-bar">
-      <view class="tab-item" @click="navigateToDepartment">部门展览</view>
-      <view class="tab-item active" @click="navigateToPaper">已填报</view>
-      <view class="tab-item" @click="navigateToInfo">个人中心</view>
-    </view>
-  </view>
+		<!-- 底部导航 -->
+		<view class="tab-bar">
+			<view class="tab-item" @click="navigateToDepartment">部门展览</view>
+			<view class="tab-item active" @click="navigateToPaper">已填报</view>
+			<view class="tab-item" @click="navigateToInfo">个人中心</view>
+		</view>
+	</view>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+	import {
+		ref,
+		onMounted
+	} from 'vue';
+	import {
+		request
+	} from '../../common/request';
 
-export default {
-  setup() {
-    // 表单数据
-    const form = ref({
-      name: '',
-      studentId: '',
-      phone: '',
-      reason: ''
-    });
+	export default {
+		setup() {
+			const finish = ref([]);
+			const questionnaires = ref([]);
 
-    // 部门名称
-    const departmentName = ref('产品部门');
+			async function getFinish() {
+				const res = await request({
+					url: `/answer/view/user`,
+					header: {
+						'content-type': 'application/json',
+						'Authorization': `Bearer ${uni.getStorageSync('authToken')}`
+					},
+				})
+				finish.value = [...res.data]
+				await getQuestionnaire()
+			}
 
-    // 提交表单
-    const submitForm = () => {
-      // 简单验证
-      if (!form.value.name || !form.value.studentId || !form.value.phone || !form.value.reason) {
-        uni.showToast({
-          title: '请填写完整信息',
-          icon: 'none'
-        });
-        return;
-      }
+			async function getQuestionName(questionnaireId) {
+				const res = await request({
+					url: `/questionnaire/view?questionnaireId=${questionnaireId}`,
+					header: {
+						'content-type': 'application/json',
+						'Authorization': `Bearer ${uni.getStorageSync('authToken')}`
+					},
+				})
+				return res.data;
+			}
 
-      // 模拟提交成功
-      uni.showToast({
-        title: '报名成功',
-        icon: 'success'
-      });
+			const viewQuestionnaire = (item) => {
+				uni.setStorageSync('QuestionnaireInfo', item)
+				uni.navigateTo({
+					url: `/pages/paper/myQuestionnaire`
+				});
+			}
 
-      // 3秒后返回上一页
-      setTimeout(() => {
-        uni.navigateBack();
-      }, 1500);
-    };
+			async function getQuestionnaire() {
+				// 使用 Promise.all 等待所有异步操作完成
+				const promises = finish.value.map(async (val) => {
+					let a = await getQuestionName(val.questionnaireId);
+					return {
+						...a,
+						...val
+					};
+				});
 
-    // 模拟从路由获取部门信息
-    const getDepartmentInfo = () => {
-      // 实际项目中，这里会从路由参数或API获取部门信息
-      // 这里使用模拟数据
-      departmentName.value = '产品部门';
-    };
+				// 等待所有Promise完成
+				questionnaires.value = await Promise.all(promises);
+			};
 
-    onMounted(() => {
-      getDepartmentInfo();
-    });
 
-    // 跳转到部门列表
-    const navigateToDepartment = () => {
-      uni.navigateTo({
-        url: '/pages/department/department'
-      });
-    };
+			onMounted(async () => {
+				document.querySelector('.uni-page-head-hd').style.display = 'none'
+				await getFinish()
 
-    // 跳转到已填报页面
-    const navigateToPaper = () => {
-      // 当前页面，不需要跳转
-    };
+			});
 
-    // 跳转到个人中心
-    const navigateToInfo = () => {
-      uni.navigateTo({
-        url: '/pages/info/info'
-      });
-    };
+			// 跳转到部门列表
+			const navigateToDepartment = () => {
+				uni.navigateTo({
+					url: '/pages/department/department'
+				});
+			};
 
-    return {
-      form,
-      departmentName,
-      submitForm,
-      navigateToDepartment,
-      navigateToPaper,
-      navigateToInfo
-    };
+			// 跳转到已填报页面
+			const navigateToPaper = () => {
+				// 当前页面，不需要跳转
+			};
 
-    // 修复getCurrentPages未定义的问题
-    function getCurrentPages() {
-      return getApp().$children[0].$children;
-    }
-  }
-};
+			// 跳转到个人中心
+			const navigateToInfo = () => {
+				uni.navigateTo({
+					url: '/pages/info/info'
+				});
+			};
+
+			// 删除问卷功能
+			const deleteQuestionnaire = (id) => {
+				// 过滤掉要删除的问卷
+				questionnaires.value = questionnaires.value.filter(item => item.id !== id);
+
+				// 这里可以添加调用API删除问卷的逻辑
+				// 例如:
+				request({
+					url: `/answer/delete?finishId=${id}`,
+					method: 'POST',
+					header: {
+						'content-type': 'application/json',
+						'Authorization': `Bearer ${uni.getStorageSync('authToken')}`
+					},
+				}).then(res => {
+					if (res.code === 200) {
+						uni.showToast({
+							title: '删除成功'
+						});
+					}
+				}).catch(err => {
+					uni.showToast({
+						title: '删除失败',
+						icon: 'none'
+					});
+				});
+			};
+
+			return {
+				questionnaires,
+				// departmentName,
+				// submitForm,
+				navigateToDepartment,
+				navigateToPaper,
+				navigateToInfo,
+				deleteQuestionnaire,
+				viewQuestionnaire
+			};
+		}
+	};
 </script>
 
 <style lang="scss">
-.paper-container {
-  padding: 20rpx;
-  padding-bottom: 100rpx;
-  background-color: #f5f5f5;
-  min-height: 100vh;
-}
+	.paper-container {
+		padding: 20rpx;
+		padding-bottom: 100rpx;
+		background-color: #f5f5f5;
+		min-height: 100vh;
+	}
 
-.header {
-  height: 88rpx;
-  line-height: 88rpx;
-  text-align: center;
-  background-color: #fff;
-  border-bottom: 1rpx solid #eee;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 999;
-}
+	.header {
+		height: 88rpx;
+		line-height: 88rpx;
+		text-align: center;
+		background-color: #fff;
+		border-bottom: 1rpx solid #eee;
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 999;
+	}
 
-.title {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #333;
-}
+	.title {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #333;
+	}
 
-.form-container {
-  margin-top: 120rpx;
-  padding: 20rpx;
-  background-color: #fff;
-  border-radius: 16rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-}
+	.form-container {
+		margin-top: 120rpx;
+		padding: 20rpx;
+		background-color: #fff;
+		border-radius: 16rpx;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+	}
 
-.form-item {
-  margin-bottom: 30rpx;
-}
+	.form-item {
+		margin-bottom: 30rpx;
+	}
 
-.label {
-  display: block;
-  font-size: 28rpx;
-  color: #333;
-  margin-bottom: 10rpx;
-}
+	.label {
+		display: block;
+		font-size: 28rpx;
+		color: #333;
+		margin-bottom: 10rpx;
+	}
 
-.input {
-  width: 100%;
-  height: 80rpx;
-  border: 1rpx solid #eee;
-  border-radius: 8rpx;
-  padding: 0 20rpx;
-  font-size: 28rpx;
-  box-sizing: border-box;
-}
+	.input {
+		width: 100%;
+		height: 80rpx;
+		border: 1rpx solid #eee;
+		border-radius: 8rpx;
+		padding: 0 20rpx;
+		font-size: 28rpx;
+		box-sizing: border-box;
+	}
 
-.textarea {
-  width: 100%;
-  height: 200rpx;
-  border: 1rpx solid #eee;
-  border-radius: 8rpx;
-  padding: 20rpx;
-  font-size: 28rpx;
-  box-sizing: border-box;
-}
+	.textarea {
+		width: 100%;
+		height: 200rpx;
+		border: 1rpx solid #eee;
+		border-radius: 8rpx;
+		padding: 20rpx;
+		font-size: 28rpx;
+		box-sizing: border-box;
+	}
 
-.value {
-  font-size: 28rpx;
-  color: #666;
-}
+	.value {
+		font-size: 28rpx;
+		color: #666;
+	}
 
-.btn-container {
-  margin: 40rpx 20rpx;
-}
+	.questionnaires-list {
+		margin-top: 120rpx;
+		padding: 20rpx;
+	}
 
-.submit-btn {
-  background-color: #e63946;
-  color: #fff;
-  font-size: 32rpx;
-  border-radius: 60rpx;
-  height: 88rpx;
-  line-height: 88rpx;
-}
+	.empty-tip {
+		text-align: center;
+		padding: 60rpx 0;
+		color: #999;
+		font-size: 28rpx;
+	}
 
-.tab-bar {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  height: 100rpx;
-  background-color: #fff;
-  border-top: 1rpx solid #eee;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
+	.questionnaire-item {
+		background-color: #fff;
+		border-radius: 16rpx;
+		padding: 24rpx;
+		margin-bottom: 20rpx;
+		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+	}
 
-.tab-item {
-  font-size: 28rpx;
-  color: #999;
-  text-align: center;
-  padding: 10rpx 0;
-}
+	.item-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 16rpx;
+	}
 
-.tab-item.active {
-  color: #e63946;
-  font-weight: bold;
-}
+	.item-actions {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 10rpx;
+	}
+
+	.item-title {
+		font-size: 30rpx;
+		font-weight: bold;
+		color: #333;
+	}
+
+	.item-time {
+		font-size: 24rpx;
+		color: #999;
+		margin-bottom: 16rpx;
+	}
+
+	.view-btn {
+		background-color: #1890ff;
+		color: white;
+		border: none;
+		padding: 10rpx 20rpx;
+		width: 75px;
+		border-radius: 8rpx;
+		font-size: 24rpx;
+		cursor: pointer;
+	}
+
+	.delete-btn {
+		background-color: #e63946;
+		color: white;
+		border: none;
+		padding: 10rpx 20rpx;
+		width: 75px;
+		border-radius: 8rpx;
+		font-size: 24rpx;
+		cursor: pointer;
+	}
+
+	.item-status {
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	.status-text {
+		font-size: 24rpx;
+		color: #007aff;
+		padding: 4rpx 16rpx;
+		border: 1rpx solid #007aff;
+		border-radius: 16rpx;
+	}
+
+	.tab-bar {
+		display: flex;
+		justify-content: space-around;
+		align-items: center;
+		height: 100rpx;
+		background-color: #fff;
+		border-top: 1rpx solid #eee;
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+	}
+
+	.tab-item {
+		font-size: 28rpx;
+		color: #999;
+		text-align: center;
+		padding: 10rpx 0;
+	}
+
+	.tab-item.active {
+		color: #e63946;
+		font-weight: bold;
+	}
 </style>

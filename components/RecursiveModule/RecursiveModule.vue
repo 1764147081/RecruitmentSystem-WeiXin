@@ -1,22 +1,29 @@
 <template>
 	<template v-for="module in modules" :key="module.id">
 		<view :class="'module-item level-' + level">
-			<view class="module-header" :class="{ 'leaf-node': module.isLeaf }" @click="module.isLeaf ? viewDepartmentDetail(module.id) : toggleModule(module)">
-	<text class="module-name">{{ module.name }}</text>
-	<text v-if="!module.isLeaf" class="arrow-icon">{{ module.expanded ? '▼' : '►' }}</text>
-</view>
-			<view v-if="module.expanded" class="submodule-list">
-				<!-- 递归渲染更深层级的子模块，最多支持10级 -->
-				<RecursiveModule v-if="module.submodules && module.submodules.length > 0 && level < 10"
-					:modules="module.submodules" :level="level + 1" :unfoldStation="unfoldStation"
-					:viewDepartmentDetail="viewDepartmentDetail" />
+			<!-- 对于isDepartment为1的部门，只显示在当前层级 -->
+			<view v-if="module.isDepartment === 1" class="module-header leaf-node" @click="viewDepartmentDetail(module.id)">
+				<text class="module-name">{{ module.name }}</text>
+			</view>
+			<view v-else>
+				<view class="module-header" @click="toggleModule(module)">
+					<text class="module-name">{{ module.name }}</text>
+					<text class="arrow-icon">{{ module.expanded ? '▼' : '►' }}</text>
+				</view>
+				<!-- 对于isDepartment不为1的模块，展开时渲染子模块和部门 -->
+				<view v-if="module.expanded" class="submodule-list">
+					<!-- 递归渲染更深层级的子模块，最多支持10级 -->
+					<RecursiveModule v-if="module.submodules && module.submodules.length > 0 && level < 10"
+						:modules="module.submodules" :level="level + 1" :unfoldStation="unfoldStation"
+						:viewDepartmentDetail="viewDepartmentDetail" />
 
-				<!-- 渲染部门 -->
-				<view v-if="module.departments && module.departments.length > 0" class="department-list">
-					<view v-for="department in module.departments" :key="department.id" class="department-item"
-						@click="viewDepartmentDetail(department.id)">
-						<text>{{ department.name }}</text>
-						<text class="arrow-right">→</text>
+					<!-- 渲染部门 -->
+					<view v-if="module.departments && module.departments.length > 0" class="department-list">
+						<view v-for="department in module.departments" :key="department.id" class="department-item"
+							@click="viewDepartmentDetail(department.id)">
+							<text>{{ department.name }}</text>
+							<text class="arrow-right">→</text>
+						</view>
 					</view>
 				</view>
 			</view>

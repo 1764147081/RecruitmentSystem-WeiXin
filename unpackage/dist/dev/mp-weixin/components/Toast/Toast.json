@@ -1,6 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "up-toast": "../../uni_modules/uview-plus/components/u-toast/u-toast"
-  }
-}

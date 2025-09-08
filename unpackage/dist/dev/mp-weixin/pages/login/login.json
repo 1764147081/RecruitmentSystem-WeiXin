@@ -1,7 +1,0 @@
-{
-  "usingComponents": {
-    "toast": "../../components/Toast/Toast",
-    "up-input": "../../uni_modules/uview-plus/components/u-input/u-input",
-    "up-checkbox": "../../uni_modules/uview-plus/components/u-checkbox/u-checkbox"
-  }
-}

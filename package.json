@@ -1,0 +1,30 @@
+{
+  "name": "recruitment-system",
+  "version": "1.0.0",
+  "description": "学线纳新系统",
+  "scripts": {
+    "dev:h5": "npm run serve",
+    "dev:mp-weixin": "npm run dev:mp-weixin",
+    "build:h5": "npm run build:h5",
+    "build:mp-weixin": "npm run build:mp-weixin"
+  },
+  "dependencies": {
+    "@dcloudio/uni-app": "2.0.2-4070520250711001",
+    "@dcloudio/uni-app-plus": "2.0.2-4070520250711001",
+    "@dcloudio/uni-h5": "2.0.2-4070520250711001",
+    "@dcloudio/uni-mp-weixin": "2.0.2-4070520250711001",
+    "vue": "^3.2.0"
+  },
+  "devDependencies": {
+    "@dcloudio/uni-cli-shared": "2.0.2-4070520250711001",
+    "@dcloudio/uni-template-compiler": "2.0.2-4070520250711001",
+    "@dcloudio/vue-cli-plugin-hbuilderx": "2.0.2-4070520250711001",
+    "@dcloudio/vue-cli-plugin-uni": "2.0.2-4070520250711001",
+    "@dcloudio/vue-cli-plugin-uni-optimize": "2.0.2-4070520250711001",
+    "@dcloudio/webpack-uni-mp-loader": "2.0.2-4070520250711001",
+    "@dcloudio/webpack-uni-pages-loader": "2.0.2-4070520250711001",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "vue-template-compiler": "^2.6.14"
+  }
+}

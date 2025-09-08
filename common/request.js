@@ -26,7 +26,6 @@ export function request(params = {}){
 			dataType,
 			success: (res) => {
 				console.log(res.data);
-				// 确保返回的数据格式一致
 				if (res.statusCode === 200) {
 					resolve(res.data || {});
 				} else {

@@ -2,7 +2,8 @@
 	<view class="department-container">
 		<!-- 搜索框 -->
 		<view class="search-box">
-			<up-input placeholder="搜索模块或部门" border="surround" v-model="searchKey" clearable></up-input>
+			<up-input placeholder="搜索模块或部门,宁可少字也不可错字哦~" border="surround" v-model="searchKey" clearable></up-input>
+			<button class="search-button" @click="searchModules">搜索</button>
 		</view>
 
 		<!-- 导航栏 -->
@@ -23,47 +24,121 @@
 <script setup>
 	import { ref, onMounted, watch } from 'vue';
 	import { onLoad, onShow } from '@dcloudio/uni-app';
-	import { useFirstStore } from '@/stores/index.js';
+	import { useDepartStore } from '@/stores/department.js';
 	import { request } from '../../common/request';
     import RecursiveModule from '../../components/RecursiveModule/RecursiveModule.vue';
 
-	const token = wx.getStorageSync('authToken');
-	const store = useFirstStore();
+	const token = uni.getStorageSync('authToken');
+	const departStore = useDepartStore();
 	const modules = ref([]);
 	const searchKey = ref('');
-	const originalModules = ref([]); // 存储原始数据
 
-	// 监听搜索关键词变化
-	watch(searchKey, (newValue) => {
-		if (!newValue) {
-			// 如果搜索框为空，恢复原始数据
-			modules.value = [...originalModules.value];
+	// 搜索功能
+	const searchModules = async () => {
+		if (!searchKey.value) {
+			// 如果搜索框为空，重新加载原始数据
+			ViewStation();
 			return;
 		}
 
-		// 根据搜索关键词过滤数据
-		const filteredModules = originalModules.value.map(module => {
-			// 过滤模块下的子模块
-			const filteredSubmodules = module.submodules.filter(submodule => {
-				// 过滤子模块下的部门
-				const filteredDepartments = submodule.departments.filter(department =>
-					department.name.toLowerCase().includes(newValue.toLowerCase())
-				);
-
-				return filteredDepartments.length > 0;
+		try {
+			const res = await request({
+				url: '/station/search',
+				method: 'GET',
+				data: {
+					name: searchKey.value
+				},
+				header: {
+					'content-type': 'application/x-www-form-urlencoded',
+					'Authorization': `Bearer ${token}`
+				}
 			});
 
-			return {
-				...module,
-				submodules: filteredSubmodules
-			};
-		}).filter(module => module.submodules.length > 0);
-
-		modules.value = filteredModules;
-	});
+			if (res.code === 200) {
+				// 处理返回的数据，根据isDepartment字段决定渲染方式
+				let formattedData = [];
+				
+				// 检查返回的数据是数组还是对象
+				if (Array.isArray(res.data)) {
+					// 如果是数组，直接处理
+					formattedData = res.data.map(item => {
+						// 根据isDepartment字段决定渲染方式
+						if (item.isDepartment === 1) {
+							// 如果是部门，直接渲染
+							return {
+								...item,
+								expanded: false,
+								submodules: [],
+								departments: [],
+								isLeaf: true,
+								isDepartment: 1
+							};
+						} else {
+							// 如果是模块，渲染并访问unfold接口
+							return {
+								...item,
+								expanded: false,
+								submodules: item.submodules || [],
+								departments: item.departments || [],
+								isLeaf: item.isLeaf || false,
+								isDepartment: item.isDepartment || 0
+							};
+						}
+					});
+				} else if (typeof res.data === 'object' && res.data !== null) {
+					// 如果是对象，将其包装在数组中再处理
+					const item = res.data;
+					// 根据isDepartment字段决定渲染方式
+					if (item.isDepartment === 1) {
+						// 如果是部门，直接渲染
+						formattedData = [{
+							...item,
+							expanded: false,
+							submodules: [],
+							departments: [],
+							isLeaf: true,
+							isDepartment: 1
+						}];
+					} else {
+						// 如果是模块，渲染并访问unfold接口
+						formattedData = [{
+							...item,
+							expanded: false,
+							submodules: item.submodules || [],
+							departments: item.departments || [],
+							isLeaf: item.isLeaf || false,
+							isDepartment: item.isDepartment || 0
+						}];
+						
+						// 当isDepartment为1时，不需要加载子模块数据
+						// await unfoldStation(item.id, formattedData[0]);
+					}
+				}
+				modules.value = formattedData;
+			} else {
+				uni.showToast({
+					title: '并没有找到哦~',
+					icon: 'none',
+					duration: 2000
+				});
+			}
+		} catch (error) {
+			console.error('搜索请求异常:', error);
+			uni.showToast({
+				title: '搜索请求异常',
+				icon: 'none',
+				duration: 2000
+			});
+		}
+	};
 
 	// 切换模块展开/折叠状态
 	const toggleModule = (module) => {
+		// 如果是部门，则不处理展开/折叠
+		if (module.isDepartment === 1) {
+			return;
+		}
+
 		module.expanded = !module.expanded;
 
 		// 如果展开模块，确保已加载其子数据
@@ -74,11 +149,16 @@
 
 	async function ViewStation() {
 		// 初始加载根目录 id=0
-		await unfoldStation(0, null, true);
+		await unfoldStation(1, null, true);
 	}
 
 	// 递归展开子模块
 	async function unfoldStation(id, parentModule, isRoot = false) {
+		// 如果parentModule是部门，则不加载子模块
+		if (parentModule && parentModule.isDepartment === 1) {
+			return;
+		}
+
 		let res = await request({
 			url: '/station/unfold',
 			method: 'GET',
@@ -90,7 +170,6 @@
 				'Authorization': `Bearer ${token}`
 			}
 		});
-
 		if (res.code === 200) {
 			console.log(`成功获取ID为${id}的子模块:`, res.data);
 
@@ -100,18 +179,21 @@
 						...item,
 						expanded: false, // 默认折叠
 						submodules: [],
-						departments: item.departments || [],
-						isLeaf: false // 标记是否为最后一级菜单
+						departments: item.isDepartment === 1 ? [] : (item.departments || []), // 如果是部门，则departments为空数组
+						isLeaf: false, // 标记是否为最后一级菜单
+						isDepartment: item.isDepartment || 0 // 添加isDepartment字段，默认为0
 					}));
 
 				if (isRoot) {
 					// 根节点数据
 					modules.value = formattedData;
-					originalModules.value = [...formattedData];
 
 					// 为根节点加载子模块
 					for (const item of formattedData) {
-						await unfoldStation(item.id, item);
+						// 如果是部门，则不加载子模块
+						if (item.isDepartment !== 1) {
+							await unfoldStation(item.id, item);
+						}
 					}
 				} else if (parentModule) {
 					// 将子模块添加到父模块
@@ -121,10 +203,11 @@
 				console.warn(`ID为${id}的数据不是期望的数组格式`);
 			}
 		} else if (res.code === 404) {
-			// 标记为最后一级菜单
+			// 不再根据404响应标记为部门，仅保留isDepartment===1的判断
 			console.log(`ID为${id}的模块是最后一级菜单`);
 			if (parentModule) {
 				parentModule.isLeaf = true;
+				// 移除parentModule.isDepartment = 1的设置，仅保留isDepartment字段本身的值
 			}
 		} 
 
@@ -133,36 +216,48 @@
 
 	onLoad(() => {
 		ViewStation();
+		document.querySelector('.uni-page-head-hd').style.display = 'none'
+	})
+	
+	// H5端隐藏返回按钮
+	onMounted(() => {
+		// #ifdef H5
+		const backButton = document.querySelector('.uni-page-head-hd');
+		if (backButton) {
+			backButton.style.display = 'none';
+		}
+		// #endif
 	})
 
-	// 查看部门详情
-	// async function viewDepartmentDetail(departmentId) {
-	// 	let res = await request({
-	// 		url: '/station/view',
-	// 		method: 'GET',
-	// 		data: {
-	// 			id: parseInt(departmentId),
-	// 		},
-	// 		header: {
-	// 			'content-type': 'application/x-www-form-urlencoded',
-	// 			'Authorization': `Bearer ${token}`
-	// 		}
-	// 	});
-	// 	if (res.code === 200) {
-	// 		console.log('Department detail loaded successfully:', res.data);
-	// 		// 跳转到详情页并传递数据
-	// 		uni.navigateTo({
-	// 			url: `/pages/department/detail?id=${departmentId}`
-	// 		});
-	// 	} else {
-	// 		console.error('Failed to load department detail:', res.message);
-	// 		uni.showToast({
-	// 			title: res.message || '获取部门详情失败',
-	// 			icon: 'none',
-	// 			duration: 2000
-	// 		});
-	// 	}
-	// }
+	async function viewDepartmentDetail(departmentId) {
+		let res = await request({
+			url: '/department/view',
+			method: 'GET',
+			data: {
+				stationId: parseInt(departmentId),
+			},
+			header: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'Authorization': `Bearer ${token}`
+			}
+		});
+		if (res.code === 200) {
+			console.log('Department detail loaded successfully:', res.data);
+			// 保存部门详情数据到store
+					departStore.setDepartmentDetail(res.data);
+					// 跳转到详情页（无需传递ID，从store获取数据）
+					uni.navigateTo({
+						url: '/pages/department/detail'
+					});
+		} else {
+			console.error('Failed to load department detail:', res.message);
+			uni.showToast({
+				title: res.message || '获取部门详情失败',
+				icon: 'none',
+				duration: 2000
+			});
+		}
+	}
 
 	// 跳转到部门列表
 	const navigateToDepartment = () => {
@@ -219,6 +314,19 @@
 
 	.search-box {
 		margin-bottom: 20rpx;
+		display: flex;
+		align-items: center;
+	}
+
+	.search-button {
+		margin-left: 20rpx;
+		background-color: #e63946;
+		color: white;
+		border: none;
+		border-radius: 10rpx;
+		padding: 10rpx 20rpx;
+		font-size: 28rpx;
+		white-space: nowrap;
 	}
 
 	.nav-container {

@@ -1,11 +1,18 @@
 <template>
 	<view class="edit-container">
-		<view class="page-title">
-			<text>编辑个人信息</text>
-		</view>
+		<u-navbar 
+			title="编辑个人信息" 
+			left-icon="arrow-left" 
+			auto-back
+			bg-color="#F8F8F8"
+			title-color="#000000"
+			:border="false"
+		>
+		</u-navbar>
 
 		<view class="avatar-container">
-			<image class="avatar" :src="previewImage || userInfo.avatar || '/static/assets/logo.png'" mode="aspectFill"></image>
+			<image class="avatar" :src="previewImage || userInfo.avatar || '/static/assets/logo.png'" mode="aspectFill">
+			</image>
 			<view class="upload-btn" @click="uploadAvatar">
 				<text>上传头像</text>
 			</view>
@@ -14,20 +21,8 @@
 
 		<view class="form-list">
 			<view class="form-item">
-				<text class="form-label">姓名</text>
-				<input class="form-input form-input-readonly" v-model="userInfo.name" placeholder="请输入姓名" readonly />
-			</view>
-			<view class="form-item">
 				<text class="form-label">个人描述</text>
 				<input class="form-input" v-model="userInfo.profile" placeholder="请输入个人描述" />
-			</view>
-			<view class="form-item">
-				<text class="form-label">学院</text>
-				<input class="form-input form-input-readonly" v-model="userInfo.depart" placeholder="请输入学院" readonly />
-			</view>
-			<view class="form-item">
-				<text class="form-label">专业</text>
-				<input class="form-input" v-model="userInfo.major" placeholder="请输入专业" />
 			</view>
 			<view class="form-item">
 				<text class="form-label">邮箱</text>
@@ -51,18 +46,20 @@
 
 <script>
 	import {
+		Logger
+	} from 'sass';
+	import {
 		request
 	} from '../../common/request';
-	import { baseUrl } from '../../common/request';
+	import {
+		baseUrl
+	} from '../../common/request';
 
 	export default {
 		data() {
 			return {
 				userInfo: {
-					name: '',
 					profile: '',
-					depart: '',
-					major: '',
 					email: '',
 					qq: '',
 					avatar: ''
@@ -83,7 +80,7 @@
 			},
 			async saveAndReturn() {
 				// 保存用户信息
-				const token = wx.getStorageSync('authToken');
+				const token = uni.getStorageSync('authToken');
 				const response = await request({
 					url: '/user/update/info',
 					method: 'PUT',
@@ -92,10 +89,7 @@
 						'Authorization': `Bearer ${token}`
 					},
 					data: JSON.stringify({
-						name: this.userInfo.name,
 						profile: this.userInfo.profile,
-						depart: this.userInfo.depart,
-						major: this.userInfo.major,
 						email: this.userInfo.email,
 						qq: this.userInfo.qq
 					})
@@ -108,7 +102,9 @@
 						duration: 2000,
 						success: () => {
 							setTimeout(() => {
-								uni.navigateBack();
+								uni.reLaunch({
+									url: '/pages/info/info'
+								});
 							}, 2000);
 						}
 					});
@@ -122,7 +118,7 @@
 			},
 
 			async getUserInfo() {
-				const token = wx.getStorageSync('authToken');
+				const token = uni.getStorageSync('authToken');
 				const response = await request({
 					url: '/user/info',
 					method: 'GET',
@@ -133,10 +129,7 @@
 				});
 				if (response.data) {
 					this.userInfo = {
-						name: response.data.name || '',
 						profile: response.data.profile || '',
-						depart: response.data.depart || '',
-						major: response.data.major || '',
 						email: response.data.email || '',
 						qq: response.data.qq || '',
 						avatar: response.data.avatar || ''
@@ -155,6 +148,11 @@
 					sizeType: ['compressed'],
 					sourceType: ['album', 'camera'],
 					success: (res) => {
+						// 检查用户是否选择了图片
+						if (!res.tempFilePaths || res.tempFilePaths.length === 0) {
+							console.log('用户未选择图片');
+							return;
+						}
 						// 检查文件大小是否超过10MB
 						const file = res.tempFiles[0];
 						const MAX_SIZE = 10 * 1024 * 1024; // 10MB
@@ -169,73 +167,79 @@
 						}
 
 						const tempFilePath = res.tempFilePaths[0];
-					// 设置预览图片路径
-					this.previewImage = tempFilePath;
-					// 上传图片
-					this.uploadFile(tempFilePath);
-					}
-				});
-			},
-			async uploadFile(filePath) {
-				try {
-					const token = wx.getStorageSync('authToken');
-					uni.showLoading({
-						title: '上传中...'
-					});
-
-					const response = await new Promise((resolve, reject) => {
-						uni.uploadFile({
-								url: baseUrl + '/user/upload/avatar',
-								filePath: filePath,
-								name: 'file',
-								header: {
-									'Authorization': `Bearer ${token}`,
-									'content-type': 'multipart/form-data'
-								},
-							success: (uploadRes) => {
-								try {
-									const data = JSON.parse(uploadRes.data);
-									resolve(data);
-								} catch (e) {
-									reject(new Error('上传失败，响应格式不正确'));
-								}
-							},
-							fail: (err) => {
-								reject(err);
-							},
-							complete: () => {
-								uni.hideLoading();
-							}
-						});
-					});
-
-					if (response.code === 200) {
-						// 更新头像
-						this.userInfo.avatar = response.data.avatarUrl;
+						// 设置预览图片路径
+						this.previewImage = tempFilePath;
+						// 上传图片
+						this.uploadFile(tempFilePath);
+					},
+					fail: (err) => {
+						console.error('选择图片失败:', err);
 						uni.showToast({
-							title: '上传成功',
-							icon: 'success',
-							duration: 2000
-						});
-					} else {
-						uni.showToast({
-							title: response.message || '上传失败',
+							title: '选择图片失败',
 							icon: 'none',
 							duration: 2000
 						});
 					}
-				} catch (error) {
-					console.error('上传头像失败:', error);
-					uni.hideLoading();
+				});
+			},
+			uploadFile(filePath) {
+				const token = uni.getStorageSync('authToken');
+				if (!token) {
 					uni.showToast({
-						title: '上传失败，请重试',
+						title: '未找到认证令牌',
 						icon: 'none',
 						duration: 2000
 					});
+					return;
 				}
+				uni.showLoading({
+					title: '上传中...'
+				});
 
-			},
-
+				// 使用uni.uploadFile上传文件
+				const uploadRes = uni.uploadFile({
+						url: baseUrl + '/user/upload/avatar',
+						filePath: filePath,
+						name: 'file',
+						header: {
+							'Authorization': `Bearer ${token}`
+						},
+					})
+					.then((uploadRes) => {
+						uni.hideLoading();
+						console.log(uploadRes)
+						if (uploadRes.statusCode === 200) {
+							console.log('上传头像返回的res:', uploadRes);
+							try {
+								const response = JSON.parse(uploadRes.data);
+								if (response.code === 200 ) {
+									// 更新头像
+									this.userInfo.avatar = response.data;
+									uni.showToast({
+										title: '上传成功',
+										icon: 'success',
+										duration: 2000
+									});
+								} else {
+									const errorMsg = response.message || response.data || '上传失败';
+									console.error('上传失败:', errorMsg);
+									uni.showToast({
+										title: errorMsg,
+										icon: 'none',
+										duration: 2000
+									});
+								}
+							} catch (error) {
+								console.error('解析响应失败:', error);
+								uni.showToast({
+									title: '上传失败',
+									icon: 'none',
+									duration: 2000
+								});
+							}
+						}
+					})
+			}
 		}
 	}
 </script>
@@ -310,18 +314,18 @@
 	}
 
 	.form-input {
-			flex: 1;
-			font-size: 30rpx;
-			color: #666;
-		}
+		flex: 1;
+		font-size: 30rpx;
+		color: #666;
+	}
 
-		.form-input-readonly {
-			flex: 1;
-			font-size: 30rpx;
-			color: #999;
-			background-color: #f5f5f5;
-			cursor: not-allowed;
-		}
+	.form-input-readonly {
+		flex: 1;
+		font-size: 30rpx;
+		color: #999;
+		background-color: #f5f5f5;
+		cursor: not-allowed;
+	}
 
 	.password-btn {
 		background-color: #007aff;
@@ -344,5 +348,4 @@
 		box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
 		margin-top: 20rpx;
 	}
-	
 </style>

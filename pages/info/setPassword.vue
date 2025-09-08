@@ -1,8 +1,14 @@
 <template>
 	<view class="password-container">
-		<view class="page-title">
-			<text>设置密码</text>
-		</view>
+		<u-navbar 
+			title="设置密码" 
+			left-icon="arrow-left" 
+			auto-back
+			bg-color="#F8F8F8"
+			title-color="#000000"
+			:border="false"
+		>
+		</u-navbar>
 
 		<view class="form-list">
 			<view class="form-item">
@@ -32,7 +38,7 @@
 	import {
 		request
 	} from '../../common/request';
-	const token = wx.getStorageSync('authToken');
+	const token = uni.getStorageSync('authToken');
 	export default {
 		data() {
 			return {

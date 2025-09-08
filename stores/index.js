@@ -14,8 +14,8 @@ export const useFirstStore = defineStore('first', () => {
 		token.value = '';
 		user.value = { username: '', studentNumber: '', password: '' };
 		isLoggedIn.value = false;
-		wx.removeStorageSync('token');
-			wx.removeStorageSync('authToken');
+		uni.removeStorageSync('token');
+		uni.removeStorageSync('authToken');
 	};
 
 	function setLoginData(res) {
@@ -24,22 +24,26 @@ export const useFirstStore = defineStore('first', () => {
 		user.value.studentNumber = res.userInfo?.studentNumber || '';
 		isLoggedIn.value = true;
 		// 持久化到本地存储
-		wx.setStorageSync('token', res.token);
+		uni.setStorageSync('token', res.token);
 	};
 
 	function setToken(newToken) {
 		token.value = newToken;
 		isLoggedIn.value = !!newToken;
 		// 持久化到本地存储
-		wx.setStorageSync('token', newToken);
+		uni.setStorageSync('token', newToken);
 	};
+	function getUsername() {
+		return user.value.username;
+	}
 	return {
 		user,
 		token,
 		isLoggedIn,
 		setLoginData,
 		setToken,
-		logout
+		logout,
+		getUsername
 	};
 
 })

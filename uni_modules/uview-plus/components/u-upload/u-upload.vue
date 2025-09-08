@@ -306,18 +306,34 @@
 						// })
 						const captureFirstFrame = () => {
 							ctx1.drawImage(myVideo, 0, 0, w * dpr, h * dpr)
-							wx.canvasToTempFilePath({
-								canvas: res[0].node,
-								success: (result) => {
-									console.log('First frame image path:', result
-										.tempFilePath)
-									// Now you can use the image path (result.tempFilePath)
-									this.fileList['currentItemIndex'].thumb = result.tempFilePath
-								},
-								fail: (err) => {
-									console.error('Failed to export image:', err)
-								}
-							})
+						// #ifdef MP-WEIXIN
+						uni.canvasToTempFilePath({
+							canvas: res[0].node,
+							success: (result) => {
+								console.log('First frame image path:', result
+									.tempFilePath)
+								// Now you can use the image path (result.tempFilePath)
+								this.fileList['currentItemIndex'].thumb = result.tempFilePath
+							},
+							fail: (err) => {
+								console.error('Failed to export image:', err)
+							}
+						})
+						// #endif
+						// #ifndef MP-WEIXIN
+						uni.canvasToTempFilePath({
+							canvas: res[0].node,
+							success: (result) => {
+								console.log('First frame image path:', result
+									.tempFilePath)
+								// Now you can use the image path (result.tempFilePath)
+								this.fileList['currentItemIndex'].thumb = result.tempFilePath
+							},
+							fail: (err) => {
+								console.error('Failed to export image:', err)
+							}
+						})
+						// #endif
 						}
 
 						// Capture the first frame
@@ -668,15 +684,13 @@
 				this.currentItemIndex = index;
 				console.log(this.lists[this.currentItemIndex])
 				// #endif
-				// #ifdef MP-WEIXIN
-				wx.previewMedia({
+				uni.previewMedia({
 					sources: sources,
 					current: current,
 					fail() {
 						toast('预览视频失败')
 					},
 				});
-				// #endif
 			},
 			onClickPreview(item, index) {
 				if (this.previewFullImage) {

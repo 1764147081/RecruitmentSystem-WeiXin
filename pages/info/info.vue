@@ -13,14 +13,14 @@
 
 		<!-- 编辑按钮 -->
 		<view class="edit-btn" @click="toEditInfo">
-			<text>编辑个人信息</text>
+			<text>修改</text>
 		</view>
 
 		<!-- 个人信息列表 -->
 		<view class="info-list">
 			<view class="info-item">
 				<text class="info-label">学院</text>
-				<text class="info-value">{{ depart }}</text>
+				<text class="info-value">{{ college }}</text>
 			</view>
 			<view class="info-item">
 				<text class="info-label">专业</text>
@@ -47,7 +47,7 @@
 
 		<!-- 底部导航 -->
 		<view class="tab-bar">
-			<view class="tab-item" @click="navigateToDepartment">部门展览</view>
+			<view class="tab-item" @click="navigateTocollegement">部门展览</view>
 			<view class="tab-item" @click="navigateToPaper">已填报</view>
 			<view class="tab-item active" @click="navigateToInfo">个人中心</view>
 		</view>
@@ -61,15 +61,16 @@
 	import {
 		request
 	} from '../../common/request';
-	
-	const token = wx.getStorageSync('authToken');
+	import {
+		onMounted
+	} from 'vue';
 	// 初始化store
 	const store = useFirstStore();
 	export default {
 		data() {
 			return {
 				username: '',
-				depart: '',
+				college: '',
 				name: '',
 				email: '',
 				qq: '',
@@ -103,9 +104,9 @@
 			},
 
 			// 跳转到部门列表
-			navigateToDepartment() {
+			navigateTocollegement() {
 				uni.navigateTo({
-					url: '/pages/department/department'
+					url: '/pages/collegement/collegement'
 				});
 			},
 
@@ -113,7 +114,7 @@
 			navigateToPaper() {
 				uni.navigateTo({
 					url: '/pages/paper/paper'
-				});
+				})
 			},
 
 			// 跳转到个人中心
@@ -121,9 +122,28 @@
 				// 当前页面，不需要跳转
 			},
 			async getUserInfo() {
-				let response;
+				// 从本地存储获取token
+				const token = uni.getStorageSync('authToken');
+
+				// 如果没有token，尝试从store获取
+				if (!token && store.token.value) {
+					console.log("从store获取token");
+					token = store.token.value;
+				}
+
+				// 如果仍然没有token，跳转到登录页面
+				if (!token) {
+					console.log("未找到token，跳转到登录页面");
+					uni.redirectTo({
+						url: '/pages/login/login'
+					});
+					return;
+				}
+
 				console.log("现在获取个人信息");
-				console.log(token);
+				console.log("token:", token);
+
+				let response;
 				response = await request({
 					url: "/user/info",
 					method: 'GET',
@@ -132,21 +152,36 @@
 						'Authorization': `Bearer ${token}`
 					}
 				});
+
 				// 处理响应数据
 				if (response && response.data) {
 					this.username = response.data.username || '';
-					this.depart = response.data.depart || '';
+					this.college = response.data.college || '';
 					this.name = response.data.name || '';
 					this.email = response.data.email || '';
 					this.qq = response.data.qq || '';
 					this.avatar = response.data.avatar || '/static/assets/nav_icon_avatar_nor.png';
 					this.profile = response.data.profile || '这个人很懒，什么都没有写';
+				} else if (response && response.code === 401) {
+					// token无效，清除本地存储并跳转到登录页面
+					uni.removeStorageSync('authToken');
+					store.logout();
+					uni.redirectTo({
+						url: '/pages/login/login'
+					});
 				}
 			}
 		},
 		onLoad() {
 			this.getUserInfo();
-		}
+		},
+
+		mounted() {
+		    this.$nextTick(() => {
+		      const el = document.querySelector('.uni-page-head-hd');
+		      if (el) el.style.display = 'none';
+		    });
+		  }
 	}
 </script>
 

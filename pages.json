@@ -25,9 +25,40 @@
 			}
 		},
 		{
+			"path": "pages/department/questionnaire",
+			"style": {
+				"navigationBarTitleText": "部门报名问卷"
+			}
+		},
+		{
+			"path": "pages/department/admin",
+			"style": {
+				"navigationBarTitleText": "部门管理"
+			}
+		},
+		{
+			"path": "pages/department/user-info",
+			"style": {
+				"navigationBarTitleText": "用户信息"
+			}
+		},
+		{
+			"path": "pages/department/user-questionnaires",
+			"style": {
+				"navigationBarTitleText": "问卷"
+			}
+		},
+
+		{
 			"path": "pages/paper/paper",
 			"style": {
 				"navigationBarTitleText": "已填报"
+			}
+		},
+		{
+			"path": "pages/paper/myQuestionnaire",
+			"style": {
+				"navigationBarTitleText": "我的问卷"
 			}
 		},
 		{

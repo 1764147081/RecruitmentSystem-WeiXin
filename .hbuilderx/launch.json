@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "configurations": [
+    {
+      "type": "uni-app:mp-weixin",
+      "name": "微信小程序",
+      "projectType": "uni-app",
+      "path": "./unpackage/dist/dev/mp-weixin",
+      "port": 9090
+    }
+  ]
+}

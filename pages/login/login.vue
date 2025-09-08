@@ -22,16 +22,16 @@
 
 					<up-input class="input" placeholder="请输入密码" border="surround" v-model="password" clearable
 						password></up-input>
-					<view v-if="loginType === 'unified'" class="captcha-container">
-						<up-input class="input captcha-input" placeholder="验证码输入位置,请先空着" border="surround"
+					<view v-if="showCaptcha" class="captcha-container">
+						<up-input class="input captcha-input" placeholder="请输入验证码" border="surround"
 							v-model="captchaCode" clearable type="number" maxlength="6"></up-input>
 					</view>
-					<template class="checkbox">
+					<view class="checkbox-and-register">
 						<up-checkbox :customStyle="{marginBottom: '5px'}" label="自动登录" name="agree" usedAlone
 							v-model:checked="aloneChecked">
 						</up-checkbox>
-
-					</template>
+						<view class="register-link" @click="goToUnifiedLogin">注册</view>
+					</view>
 					<button class="button-form"
 						@click="login()">{{ loginType === 'password' ? '账号密码登录' : '统一认证登录' }}</button>
 				</form>
@@ -58,6 +58,7 @@
 	const aloneChecked = ref(false);
 	const loginType = ref('password'); // 默认账号密码登录
 	const captchaCode = ref('');
+	const showCaptcha = ref(false); // 控制验证码输入框显示
 
 
 
@@ -77,24 +78,37 @@
 		captchaCode.value = '';
 	}
 
+	// 跳转到统一认证登录
+	function goToUnifiedLogin() {
+		switchLoginType('unified');
+	}
+
 	async function login() {
-		try {
 			// 验证参数值
 			console.log('stuID:', stuID.value);
 			console.log('password:', password.value);
 
+			// 重置验证码显示状态
+			if (loginType.value === 'unified') {
+				showCaptcha.value = false;
+			}
+
 			let response;
 			if (loginType.value === 'unified') {
 				console.log("现在使用统一认证登录");
+				const requestData = {
+					studentNumber: stuID.value,
+					password: password.value,
+					fingerprint: stuID.value
+				};
+				// 只有在需要时才发送验证码
+				if (captchaCode.value) {
+					requestData.captcha = captchaCode.value;
+				}
 				response = await request({
 					url: "/user/login/cas",
 					method: 'POST',
-					data: {
-						studentNumber: stuID.value,
-						password: password.value,
-						captcha: captchaCode.value,
-						fingerprint: stuID.value
-					},
+					data: requestData,
 					header: {
 						'content-type': 'application/x-www-form-urlencoded'
 					},
@@ -113,49 +127,56 @@
 					}
 				})
 			};
-			const token = response.data;
-			console.log(token)
-			// 根据用户是否选择“记住我”来存储token
-			if (aloneChecked.value) {
-				// 长期存储
-				wx.setStorageSync('authToken', token);
-			} else {
-				// 会话级存储（在小程序中，我们仍然使用setStorageSync，但会在退出时清除）
-				wx.setStorageSync('authToken', token);
-			}
-			// 更新Pinia中的登录状态
-			store.setLoginData({
-				token: token,
-				userInfo: response.data.userInfo
-			});
+			
 
-			// 跳转到首页或目标页面
-			if (response.code === 400) {
-				uni.showToast({
-					title: '验证码已发,请等待',
-					icon: 'none',
-					position: 'top'
-				});
-			}if (response.code === 200) {
-				uni.redirectTo({
-					url: '/pages/department/department'
-				});
-			} 
-			// else {
-				// 登录失败，清除可能存在的token
-				// 使用微信小程序API清除存储
-				// wx.removeStorageSync('authToken');
-				// store.logout();
-			// };
+			
+			// 处理响应
+				if (response.code === 200) {
+					const token = response.data;
+					console.log('Login successful, token:', token);
+					// 根据用户是否选择“记住我”来存储token
+					if (aloneChecked.value) {
+						// 长期存储
+						uni.setStorageSync('authToken', token);
+					} else {
+						// 会话级存储
+						uni.setStorageSync('authToken', token);
+					}
+					// 更新Pinia中的登录状态
+					store.setLoginData({
+						token: token,
+						userInfo: response.data.userInfo
+					});
 
-		} catch (error) {
-			console.error('登录失败', error);
-			uni.showToast({
-				title: '登录失败，请检查账号密码',
-				icon: 'none',
-				position: 'top'
-			});
-		}
+					// 跳转到首页
+					uni.redirectTo({
+						url: '/pages/department/department'
+					});
+				} else if (response.code === 400) {
+					// 检查是否需要验证码
+					if (response.msg === "需要验证码") {
+						showCaptcha.value = true;
+						uni.showToast({
+							title: '请输入验证码',
+							icon: 'none',
+							position: 'top'
+						});
+					} else {
+						uni.showToast({
+							title: response.msg || '登录失败',
+							icon: 'none',
+							position: 'top'
+						});
+					}
+				} else {
+					// 其他错误情况
+					uni.showToast({
+						title: response.msg || '登录失败',
+						icon: 'none',
+						position: 'top'
+					});
+				}
+		
 	}
 </script>
 
@@ -181,6 +202,20 @@
 		padding-top: 20px;
 		font-weight: bold;
 		font-size: 5px;
+	}
+
+	.checkbox-and-register {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
+		padding-top: 20px;
+	}
+
+	.register-link {
+		color: rgba(165, 0, 1, 1);
+		font-size: 14px;
+		cursor: pointer;
 	}
 
 	// .captcha-container {
