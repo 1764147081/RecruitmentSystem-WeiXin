@@ -1,0 +1,1 @@
+import{U as e,r as t}from"./index-BIrkV5je.js";const a=e("depart",(()=>{const e=t({});return{departmentDetail:e,setDepartmentDetail:function(t){e.value=t||{},console.log("部门详情数据已保存到store:",e.value)},getDepartmentDetail:function(){return e.value},clearDepartmentDetail:function(){e.value={},console.log("部门详情数据已清空")}}}));export{a as u};

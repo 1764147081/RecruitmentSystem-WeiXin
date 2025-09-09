@@ -28,7 +28,7 @@
 			</view>
 			<view class="info-item">
 				<text class="info-label">专业</text>
-				<text class="info-value">{{major}}</text>
+				<text class="info-value">{{ major }}</text>
 			</view>
 			<view class="info-item">
 				<text class="info-label">邮箱</text>
@@ -108,6 +108,7 @@
 					if (res.data !== null) {
 						this.tag = res.data.value || '';
 						this.tagId = res.data.id
+						console.log(tagId);
 					}
 					if (res.data = null) {
 
@@ -179,8 +180,9 @@
 							method: 'POST'
 						});
 
-						if (res.code === 200) {
-							this.tag = newTag;
+						async if (res.code === 200) {
+							await getTag()
+							
 							uni.showToast({
 								title: '修改成功',
 								icon: 'success'
